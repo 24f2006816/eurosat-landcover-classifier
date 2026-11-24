@@ -15,7 +15,7 @@ Test set: 4,050 held-out tiles (15%), measured by the [training workflow](https:
 | MobileNetV3-Small, frozen backbone | 128 px | 601K | 92.0% | 0.917 | 4 min | 3.5 |
 | **MobileNetV3-Small, fine-tuned** | 128 px | 1.5M | **98.8%** | **0.988** | 12 min | 3.5 |
 
-- **Fine-tuning wins clearly:** 98.8% accuracy, with 49 errors out of 4,050 against 176 for the from-scratch CNN.
+- **Fine-tuning wins clearly:** 98.8% accuracy, with 48 errors out of 4,050 against 176 for the from-scratch CNN.
 - **Frozen ImageNet features transfer poorly here** (92.0%). Satellite texture is far from ImageNet photos, so the backbone has to adapt, not just the head.
 - **The remaining errors are between look-alike vegetation:** pasture taken for herbaceous vegetation (9 tiles) and permanent crop vs herbaceous vegetation (9 both ways). Every class scores an F1 of at least 0.97.
 
