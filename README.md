@@ -21,7 +21,7 @@ Test set: 4,050 held-out tiles (15%), measured by the [training workflow](https:
 
 ![Confusion matrix of the fine-tuned model](docs/confusion_matrix.png)
 
-**[Try the live demo](https://huggingface.co/spaces/24f2006816/eurosat-landcover-classifier)** with tiles from the test set.
+**[Try the live demo](https://huggingface.co/spaces/24f2006816/eurosat-landcover-classifier)** with tiles from the test set. The model is exported to ONNX (`scripts/export_onnx.py`, checked to match PyTorch within 1e-5) and runs entirely in the browser with ONNX Runtime Web, so no server or GPU is needed.
 
 
 ## Dataset
@@ -57,7 +57,8 @@ landcover/data.py         EuroSAT loading, stratified split, augmentations
 landcover/models.py       small CNN, MobileNetV3 (frozen / fine-tuned)
 landcover/train.py        training loop with best-epoch checkpointing, evaluation, latency
 landcover/experiment.py   trains and compares all models; writes results/, exports the best one
-space/                    Hugging Face Space demo
+scripts/export_onnx.py    PyTorch checkpoint to ONNX, with an equivalence check
+web/                      in-browser demo (ONNX Runtime Web), deployed as a static Hugging Face Space
 ```
 
 ## License
