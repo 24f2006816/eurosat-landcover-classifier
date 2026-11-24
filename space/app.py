@@ -5,6 +5,11 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
+try:
+    import spaces  # ZeroGPU (free tier) needs at least one @spaces.GPU function; inference itself runs on CPU
+except ImportError:
+    spaces = None
+
 import gradio as gr
 import torch
 from torch import nn
@@ -47,6 +52,9 @@ def classify(image):
         probs = torch.softmax(model(preprocess(image.convert("RGB")).unsqueeze(0)), dim=-1)[0]
     return {NICE.get(c, c): float(p) for c, p in zip(classes, probs, strict=True)}
 
+
+if spaces:
+    classify = spaces.GPU(duration=15)(classify)
 
 demo = gr.Interface(
     fn=classify,
