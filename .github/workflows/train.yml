@@ -1,0 +1,49 @@
+name: Train and evaluate
+
+# Trains the three models on a CPU runner, publishes metrics and the confusion matrix, and
+# attaches the best model to the `model-v1` release for the demo.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["landcover/**", ".github/workflows/train.yml"]
+
+permissions:
+  contents: write
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+      - run: pip install -e .
+      - name: Train and evaluate
+        run: |
+          python -m landcover.experiment --export models/landcover.pt
+          cat results/metrics.md >> "$GITHUB_STEP_SUMMARY"
+          python - <<'PY'
+          import json
+          r = json.load(open("results/metrics.json"))
+          short = [{k: v for k, v in x.items() if k not in ("history", "confusion_matrix")} for x in r["results"]]
+          print("::notice title=metrics-json::" + json.dumps({"best": r["best_model"], "results": short},
+                                                             separators=(",", ":")))
+          PY
+      - name: Publish to the model-v1 release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd results/examples && zip -q ../examples.zip *.png && cd ../..
+          gh release delete model-v1 --yes --cleanup-tag || true
+          gh release create model-v1 models/landcover.pt results/metrics.json results/confusion_matrix.png \
+            results/examples.zip --title "Best EuroSAT model" \
+            --notes "Trained by the 'Train and evaluate' workflow, run ${{ github.run_id }}. Metrics in metrics.json."
+      - uses: actions/upload-artifact@v4
+        with:
+          name: results
+          path: results/
